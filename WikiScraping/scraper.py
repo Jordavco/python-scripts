@@ -68,6 +68,28 @@ class WikipediaFetcher:
         except Exception as e:
             print(f"Error searching Wikipedia: {e}")
             return []
+    def get_random_article(self):
+        """Get a random article from Wikipedia."""
+
+        params = {
+            "action": "query",
+            "format": "json",
+            "list": "random",
+            "rnlimit": 1,
+            "rnnamespace": 0,
+            "prop": "extracts",
+            "explaintext": True,
+            "exintro": False
+        }
+        try:
+            response = self.session.get(url=self.base_url, params=params)
+            response.raise_for_status()
+            data = response.json()
+            print(data["query"]["random"][0]["title"])
+            return self.get_page_content(data["query"]["random"][0]["title"])
+        except Exception as e:
+            print(f"Error getting random article: {e}")
+            return None, None, False
 
 def display_content(title, content, width=80):
     """Format and display the Wikipedia content."""
@@ -82,6 +104,8 @@ def display_content(title, content, width=80):
     else:
         print("No content found.")
 
+
+
 def main():
     wiki = WikipediaFetcher()
     
@@ -89,9 +113,10 @@ def main():
         print("\nWikipedia Content Fetcher")
         print("1. Search for a page")
         print("2. Get page by exact title")
-        print("3. Exit")
+        print("3. Get random article")
+        print("4. Exit")
         
-        choice = input("\nEnter your choice (1-3): ")
+        choice = input("\nEnter your choice (1-4): ")
         
         if choice == "1":
             query = input("Enter search query: ")
@@ -113,8 +138,12 @@ def main():
             title = input("Enter exact page title: ")
             title, content, success = wiki.get_page_content(title)
             display_content(title, content)
-            
+        
         elif choice == "3":
+            title, content, success = wiki.get_random_article()
+            display_content(title, content)
+            
+        elif choice == "4":
             print("Goodbye!")
             break
             
